@@ -47,9 +47,9 @@ I did not report expected demo/API limitations as standalone bugs. For example, 
 
 ---
 
-## 1. Sales and Contractor can access restricted Settings/admin panels
+## 1. Sales and Contractor can view admin-style Settings panels outside their apparent role scope
 
-**Severity:** Blocker  
+**Severity:** Major
 **Category:** Role-based access/Permissions  
 **Roles affected:** Sales, Contractor  
 **Viewport:** Desktop and Mobile 375px  
@@ -87,10 +87,10 @@ This is risky because Sales/Contractor users can see settings that look admin-on
 
 ---
 
-## 2. Direct URL access loads restricted admin/settings content for Sales
+## 2. Restricted `/addons` route loads admin/settings content for Sales
 
-**Severity:** Blocker  
-**Category:** Route-level permissions  
+**Severity:** Major 
+**Category:** Route-level permissions/route-guard spot check 
 **Role affected:** Sales  
 **Viewport:** Desktop  
 
@@ -149,7 +149,8 @@ Contractor should have even more limited access and should only see information 
 
 Sales and Contractor users can see many broad sidebar sections that appear to be intended for higher-permission or admin users. These include areas such as Reports, Custom Dashboards, Marketing, Referrals, HR, Projects, Integrations, Google Business, Google Drive, LinkedIn Pages, Meta, Zapier, Social Scheduler, Inbound Leads, Threads, Auto-responders, Ads Insights, Ad Campaigns, and Admin / Tickets.
 This makes the lower-permission roles look like they have access to workspace-wide, marketing, reporting, integration, and admin-level features, even if some of those areas may not fully work after opening them.
-The same issue also appears in the command palette, where Referrals is shown as a page result for both Sales and Contractor users.
+Some restricted surfaces also appeared discoverable through global navigation/search during testing, although command-palette behavior was inconsistent between passes. The same role permission matrix should be used for sidebar, mobile menu, command palette, and route guards.
+
 ### Why it matters
 
 Restricted surfaces should not be discoverable through navigation or global search. Even if some pages are blocked later, exposing them in the sidebar or command palette weakens role-based access expectations and creates confusion.
@@ -183,8 +184,10 @@ Contractor should only see dashboard information related to their own assigned w
 
 ### Actual
 
-The Contractor role can see workspace-level dashboard data that appears too broad for this permission level. This includes the number of active clients, pipeline activity, revenue-related information, deals by stage and value, client and lead names, lead sources, win rate, AI Lead Scorer data, and the conversion funnel.
-This exposes business-wide CRM, sales, and performance information to a role that should likely only have access to limited personal or task-specific data.
+Contractor can see workspace-level dashboard data that appears outside the expected Contractor scope. This includes `Active clients: 6`, pipeline activity, deals by stage, stuck deals, lead names, client names, and deal values such as `$2.9k`, `$1.8k`, `$2.4k`, and `$5.4k`.
+
+The Contractor dashboard is not limited to assigned tasks, assigned deliverables, or own meetings. It still exposes sales pipeline and business-performance information.
+
 ### Why it matters
 
 Contractors should not have access to company-wide business information. This exposes information outside the contractor’s assigned work and breaks role-based access expectations.
@@ -193,11 +196,11 @@ Contractors should not have access to company-wide business information. This ex
 
 Replace the current Contractor dashboard with a more limited “My Work” dashboard that only shows information relevant to that user. For this role, the dashboard should focus on assigned tasks, assigned deliverables, upcoming or owned meetings, deadlines, and personal work status.
 Workspace-wide sales and reporting widgets should be removed for Contractor users. This includes revenue, pipeline activity, deal values, lead sources, win rate, AI Lead Scorer data, and conversion funnel metrics.
-Dashboard data should also be filtered by role before it is sent to the client, so lower-permission users cannot receive or inspect data they should not have access to.
+Dashboard widgets and their underlying data should be scoped by role, so lower-permission users only see information appropriate for their assigned work.
 
 ---
 
-## 5. Sales dashboard exposes financial/reporting data
+## 5. Sales dashboard still exposes pipeline and deal-value reporting widgets
 
 **Severity:** Major  
 **Category:** Data visibility/Dashboard  
@@ -214,10 +217,13 @@ Dashboard data should also be filtered by role before it is sent to the client, 
 
 Sales users should not be able to see sensitive financial or company-wide business data. This includes monthly recurring revenue, total revenue, financial performance numbers, top-paying clients, full workspace reports, broad sales pipeline data, and deal values that are outside of their assigned scope.
 For the Sales role, the dashboard and reports should only show sales information that is directly relevant to the user’s assigned work.
+
 ### Actual
 
 Some of the main financial cards are hidden for the Sales role, but Sales users can still see broad company-wide dashboard data that appears outside their expected scope.
-This includes pipeline activity, a revenue section, deals grouped by stage with dollar amounts, stuck deals with dollar values, win rate, lead sources, AI Lead Scorer data, the conversion funnel, activity heat map, and other workspace-style activity widgets.
+
+This includes pipeline activity with a Revenue chart toggle, deals grouped by stage with dollar amounts, stuck deals with dollar values, win rate, lead sources, AI Lead Scorer data, the conversion funnel, activity heat map, and other workspace-style activity widgets.
+
 Because of this, the Sales dashboard still exposes business-wide sales and performance information, even though the role should only see data related to assigned work.
 ### Why it matters
 
@@ -226,11 +232,11 @@ Only hiding the top financial cards is not enough. Sales can still infer financi
 ### Suggested fix
 Apply Sales role permissions across the entire Dashboard, not only to the top KPI cards. The Sales dashboard should only show information related to that user’s assigned work, such as assigned clients, assigned deals, tasks, and relevant activity.
 Company-wide dashboard widgets should be hidden for Sales users, especially sections related to revenue, reporting, pipeline-wide activity, deal values, conversion data, lead scoring, and workspace-level performance metrics.
-Restricted financial and reporting data should also be filtered before it is sent to the client, so Sales users cannot access data that is outside their role or assigned scope.
+Restricted financial and reporting widgets should use the same Sales role scope as the rest of the app, so Sales users only see data tied to their allowed records.
 
 ---
 
-## 6. Sales can see all clients and retainer values instead of assigned clients only
+## 6. Sales appears to see the broad client table and retainer values instead of assigned clients only
 
 **Severity:** Major  
 **Category:** Data visibility/Clients  
@@ -247,12 +253,12 @@ Restricted financial and reporting data should also be filtered before it is sen
 
 ### Expected
 
-Sales should see assigned clients only.
+Sales should see assigned clients only. If Sales is intentionally allowed to see broader workspace clients, the briefing and UI should clearly document that permission.
 
 ### Actual
 
-Sales users can see the full client table instead of only the clients assigned to them. This includes client records such as Brickell Bites, La Vie Mediterranean, Habibi UCF, Naya Grill, Steel & Stone, and Atlas Fitness.
-Sales users can also see financial retainer values for these clients, even though some of the clients may not be assigned to their scope. This exposes client and revenue-related information that should likely be limited based on role and assignment.
+Sales users appear to see the broad demo client table instead of a clearly assigned-only client list. This includes client records such as Brickell Bites, La Vie Mediterranean, Habibi UCF, Naya Grill, Steel & Stone, and Atlas Fitness.
+
 ### Why it matters
 
 Sales users can access client and revenue information outside their assigned ownership. This exposes the full client list, client names outside their scope, client payment levels, and wider business performance information.
@@ -261,7 +267,7 @@ Sales users can access client and revenue information outside their assigned own
 
 For the Sales role, the Clients page should be filtered so users only see clients assigned to them or clients they are allowed to work with.
 Financial columns, such as retainer amounts, should be hidden unless the Sales role is explicitly allowed to view that information.
-This filtering should happen on the backend/API before the data is sent to the frontend, not only through UI hiding, so restricted client and financial data is not exposed to unauthorized roles.
+Client visibility and financial columns should be enforced consistently at the data/query layer and in the UI.
 
 ---
 
@@ -275,15 +281,15 @@ This filtering should happen on the backend/API before the data is sent to the f
 ### Steps to reproduce
 
 1. Open the demo app as Owner.
-2. Toggle the theme using the topbar theme button.
-3. Open Settings.
-4. Click `Retry panel`.
+2. Open Settings.
+3. If the Settings error appears, click `Retry panel`.
+4. Reload the CRM and open Settings again.
 
 ![Screenshot](screenshots/7.png)
 
 ### Expected
 
-Settings should render normally in both light and dark mode. If a panel fails, `Retry panel` should recover it or show a clear user-facing fallback state.
+Settings should render normally for Owner. If a panel fails, `Retry panel` should recover it or show a clear user-facing fallback state.
 
 ### Actual
 
@@ -471,24 +477,22 @@ Make each control handle only its own click action. Prevent row-level clicks fro
 
 ---
 
-## Additional 03 — Task creation form validation and keyboard behavior is unreliable
+## Additional 03 — Empty task validation only reports one missing field
 
-**Severity:** Major  
-**Category:** Core workflow/Tasks  
+**Severity:** Minor  
+**Category:** Forms/Validation  
 **Roles affected:** Owner, Sales  
 **Viewport:** Desktop and Mobile 375px  
 
 ### Summary
 
-The task creation form does not clearly show all missing required fields. When submitting an empty task form, the app only shows one missing-field message, such as `Pick a contact first`. Other required fields are not highlighted.
-
-In one pass, after entering Title and Due Date, the form stayed open and no new task appeared. Pressing Enter in the title field also gave no visible action, validation, or feedback.
+Submitting an empty task form only shows the first missing-field message, such as `Pick a contact first`, instead of marking all required fields at once. In a later pass, valid task creation worked successfully, so this appears to be a validation UX issue rather than a broken task-creation workflow.
 
 ### Suggested fix
 
 - Show inline validation for every required field before submission.
 - Clearly mark and highlight required fields when missing.
-- After submitting, either create the task and show it in the list, or block submission and explain exactly what still needs to be fixed.
+- Move focus to the first invalid field.
 - Handle Enter consistently by submitting the form or triggering validation.
 
 ---
@@ -625,7 +629,7 @@ Add visible edit controls or a card overflow menu for meeting type management.
 
 ## Additional 11 — Power Dialer shows sign-in warning instead of demo dialer controls
 
-**Severity:** Major  
+**Severity:** Minor
 **Category:** Click-to-call/Power Dialer UI  
 **Role affected:** Owner  
 **Viewport:** Desktop  
@@ -700,7 +704,7 @@ Either rename the action to `Start SMS thread` or add full composer fields and c
 
 ---
 
-## Additional 14 — Owner command palette cannot find Integrations
+## Additional 14 — Owner command palette default page results omit Integrations
 
 **Severity:** Minor  
 **Category:** Command palette/Navigation  
@@ -710,7 +714,7 @@ Either rename the action to `Start SMS thread` or add full composer fields and c
 ### Steps to reproduce
 
 1. Open `Ctrl+K` as Owner.
-2. Search `Integrations`.
+2. Review the default Page results.
 
 ### Expected
 
@@ -718,7 +722,7 @@ The Integrations page should appear because it exists for Owner.
 
 ### Actual
 
-No Integrations result appears in the command palette.
+The default command-palette Page results include core pages such as Dashboard, Clients, Leads, Contracts, Deliverables, Tasks, Calendar, and Meetings, but do not include Integrations.
 
 ### Suggested fix
 
@@ -730,11 +734,17 @@ Index all visible Owner navigation pages in `Ctrl+K`, including Integrations and
 
 ## No issue found/not reported
 
-I did not report the Owner integration cards as a bug because they appeared to include the expected set during one testing pass. 
-This included Stripe, Stripe Connect, Twilio, Square, Google Workspace, Google Maps, Microsoft 365, Calendly, Dropbox, LinkedIn Personal/Pages, Google Business Profile, Meta/Facebook/Instagram, Zapier, Web3Forms, RocketReach, OpenAI/Anthropic/Gemini, Gmail/IMAP, and R2/S3 storage.
-WhatsApp also showed a clear Connect WhatsApp Business landing state instead of a raw unauthorized or broken error.
-The meeting scheduler modal opened successfully, and pressing Escape closed it correctly during one pass. Basic New Task creation also worked successfully during one pass.
-I also did not report missing real dialing, real SMS sending, OAuth redirects, Stripe checkout, or real API calls as bugs, because those appear to be expected demo limitations.
+WhatsApp showed a clear Connect WhatsApp Business landing state instead of a raw unauthorized or broken error.
+
+I did not report missing real dialing, real SMS sending, OAuth redirects, Stripe checkout, or real API calls as bugs, because those appear to be expected demo limitations.
+
+## Retest needed
+
+Owner integration-card completeness should be re-tested after the Settings crash is fixed. During testing, integration-related navigation and Settings surfaces were visible, but Settings later entered a loading-error state, so I am not making a definitive claim that every expected Owner integration card is present.
+
+Backup & Restore and Audit Log / Member Activity should also be re-tested after Settings is stable.
+
+Task creation and validation should be re-tested across roles because behavior differed between passes.
 
 ## Related to existing Top 10 finding
 
