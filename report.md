@@ -39,7 +39,7 @@ Testing focused on:
 During testing, I found several issues across role-based access, route permissions, dashboard data exposure, Settings/admin workflows, responsive layout, and core CRM workflows.
 The main problems were related to lower-permission roles being able to see or open areas that should normally be restricted, such as admin, reporting, integration, privacy, and financial sections. I also found cases where hidden pages could still be accessed through direct URLs, workspace data was exposed between roles, Owner/admin pages showed raw errors, lead queue data was lost or left inconsistent, and some topbar actions became unreachable on common screen sizes.
 I prioritized the top 10 findings because they have the biggest impact on permission trust, restricted data visibility, core CRM workflows, and overall usability. Smaller findings are listed separately so they can still be reviewed without making the main report harder to follow.
-I did not report expected demo/API limitations as standalone bugs. For example, I did not count unavailable SMS, real calls, OAuth redirects, Stripe checkout, or real backend snapshots as bugs by themselves. I only reported those areas when the UI showed raw errors, missing expected demo UI, confusing states, or blocked something that should still be testable in the demo.
+I did not report expected demo/API limitations as standalone bugs. For example, I did not count unavailable SMS, real calls, OAuth redirects, Stripe checkout, or real backend snapshots as bugs by themselves. I only reported those areas when the UI showed raw errors, missing expected demo UI, confusing states, or blocked something that should still be testable in the demo. I prioritized issues that were reproducible, role-related, or likely to affect trust in the demo.
 
 ---
 
@@ -75,7 +75,7 @@ Contractor access is especially concerning because this role can also see enable
 
 ### Why it matters
 
-This breaks the permission model and exposes sensitive workspace-level admin, privacy, configuration, and data-management surfaces to lower-permission users.
+This is risky because Sales/Contractor users can see settings that look admin-only. Even if some actions fail later, the UI still exposes restricted areas and makes the role permissions unreliable.
 
 ### Suggested fix
 
